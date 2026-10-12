@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>♥</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const colors = ["red", "blue", "lime", "yellow", "cyan", "magenta", "orange", "pink"];
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  let W, H, scale;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    W = canvas.width = innerWidth * dpr;
+    H = canvas.height = innerHeight * dpr;
+    scale = Math.min(W, H) / 520;   // сердце ~ 400 единиц в ширину
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H);
+    i = 0;                           // перерисовать с начала при повороте экрана
+  }
+
+  // экранные координаты (turtle: y вверх, у canvas: y вниз)
+  const px = x => W / 2 + x * scale;
+  const py = y => H / 2 - (y - 10) * scale;
+
+  let i = 0;
+  const N = 120;
+
+  function step() {
+    if (i < N) {
+      const a = i * (Math.PI * 2) / N;
+      const x = 16 * Math.pow(Math.sin(a), 3) * 12;
+      const y = (13 * Math.cos(a) - 5 * Math.cos(2 * a)
+                 - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * 12;
+      const c = colors[Math.floor(Math.random() * colors.length)];
+
+      ctx.strokeStyle = c;
+      ctx.lineWidth = Math.max(1, scale * 0.6);
+      ctx.lineCap = "round";
+
+      // луч из центра в точку сердца
+      ctx.beginPath();
+      ctx.moveTo(px(0), py(0));
+      ctx.lineTo(px(x), py(y));
+      ctx.stroke();
+
+      // звёздочка из 8 лучей
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const t = k * Math.PI / 4;
+        ctx.moveTo(px(x), py(y));
+        ctx.lineTo(px(x + 6 * Math.cos(t)), py(y + 6 * Math.sin(t)));
+      }
+      ctx.stroke();
+
+      i++;
+      setTimeout(step, 45);
+    }
+  }
+
+  resize();
+  addEventListener("resize", () => { const done = i >= N; resize(); if (done) step(); });
+  step();
+</script>
+</body>
+</html>
